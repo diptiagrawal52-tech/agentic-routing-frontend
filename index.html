@@ -665,9 +665,7 @@
       runLogTicker();
 
       const payload = {
-        issue: issueText,
-        priority: selectedPriority,
-        autonomy: autonomyRange.value
+        problem_statement: `${issueText}\n\nPriority: ${selectedPriority.toUpperCase()}\nAutonomy Target: ${autonomyRange.value}%`
       };
 
       try {
@@ -714,17 +712,70 @@
         let actionPlanData = [];
 
         if (results && typeof results === 'object') {
-          // Extract analysis
-          const analysisRaw = results.analysis || results.Analysis || results.root_cause || '';
-          analysisContent = analysisRaw ? formatText(analysisRaw) : 'Analysis parsed from general response:\n' + formatText(JSON.stringify(results));
-          
-          // Extract strategy
-          const strategyRaw = results.strategy || results.Strategy || results.routing_plan || '';
-          strategyContent = strategyRaw ? formatText(strategyRaw) : 'Strategy compiled successfully.';
+          // If the backend returned a unified response string (FastAPI AgentResponse format)
+          if (results.response && typeof results.response === 'string') {
+            const responseText = results.response;
+            const analysisMarker = '[ANALYSIS]';
+            const strategyMarker = '[STRATEGY]';
+            const actionPlanMarker = '[ACTION PLAN]';
 
-          // Extract action plan
-          const actionRaw = results.actionPlan || results.action_plan || results.ActionPlan || results.Action_Plan || results.steps || [];
-          actionPlanData = actionRaw;
+            const hasAnalysis = responseText.includes(analysisMarker);
+            const hasStrategy = responseText.includes(strategyMarker);
+            const hasActionPlan = responseText.includes(actionPlanMarker);
+
+            if (hasAnalysis || hasStrategy || hasActionPlan) {
+              const analysisIndex = responseText.indexOf(analysisMarker);
+              const strategyIndex = responseText.indexOf(strategyMarker);
+              const actionPlanIndex = responseText.indexOf(actionPlanMarker);
+
+              const sections = [
+                { name: 'analysis', marker: analysisMarker, index: analysisIndex },
+                { name: 'strategy', marker: strategyMarker, index: strategyIndex },
+                { name: 'actionPlan', marker: actionPlanMarker, index: actionPlanIndex }
+              ].filter(s => s.index !== -1).sort((a, b) => a.index - b.index);
+
+              for (let i = 0; i < sections.length; i++) {
+                const start = sections[i].index + sections[i].marker.length;
+                const end = (i + 1 < sections.length) ? sections[i+1].index : responseText.length;
+                let sectionText = responseText.substring(start, end).trim();
+                
+                if (sectionText.startsWith(':')) {
+                  sectionText = sectionText.substring(1).trim();
+                }
+
+                if (sections[i].name === 'analysis') {
+                  analysisContent = formatText(sectionText);
+                } else if (sections[i].name === 'strategy') {
+                  strategyContent = formatText(sectionText);
+                } else if (sections[i].name === 'actionPlan') {
+                  actionPlanData = sectionText
+                    .split(/\n+/)
+                    .map(item => item.trim())
+                    .filter(item => item && (item.startsWith('-') || item.startsWith('*') || item.match(/^\d+\./) || item.startsWith('[')))
+                    .map(item => item.replace(/^-\s*|^\[\s*\]\s*|^\*\s*|^\d+\.\s*/, '').trim());
+
+                  if (actionPlanData.length === 0 && sectionText) {
+                    actionPlanData = sectionText.split('. ').map(s => s.trim()).filter(s => s);
+                  }
+                }
+              }
+            } else {
+              // Fallback if results.response is a plain string without markers
+              analysisContent = `<strong>Swarm Analysis:</strong><br>${formatText(responseText)}`;
+              strategyContent = "Strategy compiled as unified directive block.";
+              actionPlanData = ["Verify agent directive execution status.", "Notify supply chain ops supervisor."];
+            }
+          } else {
+            // Support original mock format (mockResponses) or custom structured objects
+            const analysisRaw = results.analysis || results.Analysis || results.root_cause || '';
+            analysisContent = analysisRaw ? formatText(analysisRaw) : 'Analysis parsed from general response:\n' + formatText(JSON.stringify(results));
+            
+            const strategyRaw = results.strategy || results.Strategy || results.routing_plan || '';
+            strategyContent = strategyRaw ? formatText(strategyRaw) : 'Strategy compiled successfully.';
+
+            const actionRaw = results.actionPlan || results.action_plan || results.ActionPlan || results.Action_Plan || results.steps || [];
+            actionPlanData = Array.isArray(actionRaw) ? actionRaw : [actionRaw];
+          }
         } else if (typeof results === 'string') {
           // If response is just a string, attempt to segment it
           analysisContent = `<strong>Summary:</strong><br>${formatText(results)}`;
