@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise Agentic Routing Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              bg: '#090D1A',
+              card: '#111827',
+              border: '#1F2937',
+              accent: '#3B82F6',
+              success: '#10B981',
+              warning: '#F59E0B',
+              danger: '#EF4444',
+            }
+          },
+          boxShadow: {
+            'glow-blue': '0 0 15px rgba(59, 130, 246, 0.15)',
+            'glow-emerald': '0 0 15px rgba(16, 185, 129, 0.15)',
+            'glow-indigo': '0 0 15px rgba(99, 102, 241, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Premium background grid styling */
+    .grid-bg {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(31, 41, 55, 0.15) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(31, 41, 55, 0.15) 1px, transparent 1px);
+    }
+    
+    /* Glowing radial gradients in background */
+    .glow-orbs {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom scrollbar for clean dark mode look */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D1A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #374151;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-slate-100 font-sans h-full min-h-screen relative overflow-x-hidden flex flex-col grid-bg">
+
+  <!-- Background Orbs -->
+  <div class="glow-orbs top-[-200px] left-[-200px]"></div>
+  <div class="glow-orbs bottom-[-200px] right-[-200px] bg-[radial-gradient(circle,rgba(16,185,129,0.05)_0%,transparent_70%)]"></div>
+
+  <!-- Header Section -->
+  <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-xl shadow-lg shadow-indigo-500/20">
+          <!-- Logo Network Icon -->
+          <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            NEXUS <span class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/40 text-indigo-400 font-semibold uppercase tracking-widest">Router</span>
+          </h1>
+          <p class="text-xs text-slate-400">Enterprise Agentic Supply Chain Routing</p>
+        </div>
+      </div>
+
+      <!-- Live Agent Status Banner -->
+      <div class="flex items-center space-x-6 text-sm">
+        <div class="hidden sm:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/50">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-xs text-slate-300 font-medium">9 Autonomous Agents Active</span>
+        </div>
+        
+        <!-- Live Time/Indicator -->
+        <div class="text-slate-400 text-xs font-mono hidden md:block">
+          SYSTEM CLOCK: <span id="system-clock">00:00:00 UTC</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10 flex flex-col lg:flex-row gap-8">
+    
+    <!-- Left Column: Controls & Input -->
+    <section class="w-full lg:w-5/12 flex flex-col space-y-6">
+      
+      <!-- Operations Control Card -->
+      <div class="bg-brand-card/90 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+        
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <i data-lucide="terminal" class="w-5 h-5 text-indigo-400"></i> Dispatch Console
+        </h2>
+        
+        <p class="text-sm text-slate-400 mb-5">
+          Report active logistical disruptions, routing failures, or supply bottlenecks. The Agentic framework will parse details, consult alternate channels, and coordinate a recovery path.
+        </p>
+
+        <!-- Issue Input Form -->
+        <div class="space-y-4">
+          <div>
+            <label for="issue-input" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+              Logistics/Supply Chain Disruption Details
+            </label>
+            <textarea 
+              id="issue-input"
+              rows="6"
+              class="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 resize-none text-sm font-sans"
+              placeholder="e.g., Vessel delay at Port of Savannah is holding up 14 containers of lithium batteries. Expected arrival was May 24th, risking contract breach on client SLA."
+            ></textarea>
+          </div>
+
+          <!-- Parameter Controls (Premium polish) -->
+          <div class="grid grid-cols-2 gap-4 bg-slate-900/40 p-4 rounded-xl border border-slate-800/60">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Priority Tier
+              </label>
+              <div class="flex space-x-1" id="priority-selector">
+                <button type="button" data-priority="low" class="flex-1 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-400 hover:bg-slate-700 transition">LOW</button>
+                <button type="button" data-priority="med" class="flex-1 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-400 hover:bg-slate-700 transition">MED</button>
+                <button type="button" data-priority="high" class="flex-1 py-1 text-xs font-semibold rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition">HIGH</button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Autonomy Target
+              </label>
+              <div class="flex items-center space-x-2 py-1">
+                <input 
+                  type="range" 
+                  id="autonomy-range" 
+                  min="50" 
+                  max="100" 
+                  value="90" 
+                  class="w-full accent-indigo-500 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                >
+                <span id="autonomy-val" class="text-xs font-mono font-bold text-indigo-400">90%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Templates Section -->
+          <div>
+            <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              Select Simulation Template
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button 
+                onclick="loadTemplate('portCongestion')"
+                class="flex items-center space-x-2 text-left p-2.5 bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 hover:border-indigo-500/50 rounded-lg text-xs text-slate-300 transition duration-150 group"
+              >
+                <i data-lucide="anchor" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400"></i>
+                <span class="truncate font-medium">LAX Port Congestion Delay</span>
+              </button>
+              <button 
+                onclick="loadTemplate('customsHold')"
+                class="flex items-center space-x-2 text-left p-2.5 bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 hover:border-indigo-500/50 rounded-lg text-xs text-slate-300 transition duration-150 group"
+              >
+                <i data-lucide="file-warning" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400"></i>
+                <span class="truncate font-medium">Frankfurt Customs Hold</span>
+              </button>
+              <button 
+                onclick="loadTemplate('tempSpike')"
+                class="flex items-center space-x-2 text-left p-2.5 bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 hover:border-indigo-500/50 rounded-lg text-xs text-slate-300 transition duration-150 group"
+              >
+                <i data-lucide="thermometer-snowflake" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400"></i>
+                <span class="truncate font-medium">Reefer Cold Chain Break</span>
+              </button>
+              <button 
+                onclick="loadTemplate('freightSpike')"
+                class="flex items-center space-x-2 text-left p-2.5 bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 hover:border-indigo-500/50 rounded-lg text-xs text-slate-300 transition duration-150 group"
+              >
+                <i data-lucide="trending-up" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400"></i>
+                <span class="truncate font-medium">Midwest Trucking Deficit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Execute Button -->
+          <button 
+            id="execute-btn"
+            class="w-full mt-4 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-indigo-900/30 hover:shadow-indigo-500/25 transition duration-200 flex items-center justify-center space-x-3 group relative overflow-hidden active:scale-[0.98]"
+          >
+            <i data-lucide="zap" class="w-5 h-5 text-indigo-200 group-hover:scale-110 transition duration-150"></i>
+            <span>Execute Agentic Analysis</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Config & Endpoint Info (Helpful user widget) -->
+      <div id="endpoint-warning" class="bg-slate-900/50 border border-amber-500/20 rounded-2xl p-4 flex items-start space-x-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5"></i>
+        <div class="text-xs text-slate-400">
+          <span class="font-semibold text-amber-400 block mb-0.5">Demo & Endpoint Notice</span>
+          Using the fallback demo mode because <code class="text-indigo-400 font-mono">BACKEND_URL</code> is currently set to the default placeholder. Change the variable inside <code class="text-slate-300">index.html</code> to your live Render endpoint URL to stream real backend responses.
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Live Output & Agent Logs -->
+    <section class="w-full lg:w-7/12 flex flex-col min-h-[500px]">
+      
+      <!-- Awaiting Input / Empty State -->
+      <div 
+        id="empty-state" 
+        class="flex-1 bg-brand-card/30 border border-dashed border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-4 shadow-inner"
+      >
+        <div class="p-4 bg-slate-900/80 rounded-full border border-slate-800 text-slate-500 relative">
+          <i data-lucide="box" class="w-10 h-10"></i>
+          <span class="absolute top-1 right-1 flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-20"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500/40"></span>
+          </span>
+        </div>
+        <div class="max-w-md">
+          <h3 class="text-lg font-bold text-slate-300">Dashboard Awaiting Logistics Feed</h3>
+          <p class="text-sm text-slate-500 mt-1">
+            Input a shipment crisis, select priority tags, and trigger the agent swarm to resolve route delays and design an optimized action timeline.
+          </p>
+        </div>
+      </div>
+
+      <!-- Loading / Thinking State -->
+      <div 
+        id="loading-state" 
+        class="hidden flex-1 bg-brand-card/90 border border-slate-800 rounded-2xl p-6 md:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden"
+      >
+        <!-- Top glowing loader bar -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-slate-800 overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-indigo-500 via-emerald-400 to-indigo-500 animate-[pulse_1.5s_infinite] w-full origin-left"></div>
+        </div>
+
+        <div class="flex flex-col items-center justify-center flex-1 py-12 space-y-6">
+          <!-- Spinner Graphic -->
+          <div class="relative">
+            <div class="w-16 h-16 rounded-full border-4 border-slate-800/80 border-t-indigo-500 animate-spin"></div>
+            <div class="w-10 h-10 rounded-full border-4 border-slate-800 border-b-emerald-400 animate-spin absolute top-3 left-3" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+          </div>
+
+          <div class="text-center">
+            <h4 class="text-base font-bold text-white">Agent Sub-Swarm Assembling</h4>
+            <p class="text-xs text-indigo-400 font-mono mt-1">Resolving Network Path Nodes...</p>
+          </div>
+        </div>
+
+        <!-- Terminal Logs (Wow factor) -->
+        <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 font-mono text-xs text-slate-400 space-y-2 max-h-40 overflow-y-auto">
+          <div class="flex items-center space-x-2 border-b border-slate-800 pb-2 mb-2">
+            <span class="h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            <span class="font-bold text-slate-300">Swarm Execution Log</span>
+          </div>
+          <div id="loading-logs" class="space-y-1.5">
+            <!-- Dynamically populated by JS ticker -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Dossier Display -->
+      <div 
+        id="output-state" 
+        class="hidden flex-1 flex flex-col space-y-6"
+      >
+        <!-- Header status card -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 border border-indigo-500/20 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+          <!-- Glowing mesh accent -->
+          <div class="absolute right-0 top-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-xl pointer-events-none"></div>
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded text-2xs font-bold font-mono tracking-wider">RESOLVED</span>
+                <span class="text-xs font-mono text-slate-400">ID: <span id="output-id">AR-9402</span></span>
+              </div>
+              <h3 class="text-lg font-bold text-white mt-1">Agentic Routing Resolution Dossier</h3>
+            </div>
+            
+            <button 
+              onclick="resetDashboard()" 
+              class="self-start sm:self-auto flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg text-slate-300 border border-slate-700 hover:border-slate-600 transition"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>New Analysis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- The 3 Beautiful Visual Blocks (Split Card) -->
+        <div class="grid grid-cols-1 gap-6">
+          
+          <!-- Block 1: Analysis (Blue/Indigo glow) -->
+          <div class="bg-brand-card border border-slate-800/90 rounded-2xl p-6 shadow-glow-blue relative overflow-hidden group hover:border-indigo-500/30 transition duration-300">
+            <!-- Icon Background Circle -->
+            <div class="absolute top-0 right-0 p-8 text-indigo-500/5 pointer-events-none group-hover:text-indigo-500/10 transition duration-300">
+              <i data-lucide="zoom-in" class="w-24 h-24"></i>
+            </div>
+            
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 border border-indigo-500/20">
+                <i data-lucide="search" class="w-5 h-5"></i>
+              </div>
+              <h4 class="text-md font-bold text-white tracking-wide">1. Disruptive Root Cause Analysis</h4>
+            </div>
+
+            <!-- Content Area -->
+            <div id="output-analysis" class="text-sm text-slate-300 space-y-3 leading-relaxed">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Block 2: Strategy (Purple/Violet glow) -->
+          <div class="bg-brand-card border border-slate-800/90 rounded-2xl p-6 shadow-glow-indigo relative overflow-hidden group hover:border-violet-500/30 transition duration-300">
+            <!-- Icon Background Circle -->
+            <div class="absolute top-0 right-0 p-8 text-violet-500/5 pointer-events-none group-hover:text-violet-500/10 transition duration-300">
+              <i data-lucide="route" class="w-24 h-24"></i>
+            </div>
+
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="p-2 bg-violet-500/10 rounded-lg text-violet-400 border border-violet-500/20">
+                <i data-lucide="milestone" class="w-5 h-5"></i>
+              </div>
+              <h4 class="text-md font-bold text-white tracking-wide">2. Strategic Mitigation Routing</h4>
+            </div>
+
+            <!-- Content Area -->
+            <div id="output-strategy" class="text-sm text-slate-300 space-y-3 leading-relaxed">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Block 3: Action Plan (Emerald/Teal glow) -->
+          <div class="bg-brand-card border border-slate-800/90 rounded-2xl p-6 shadow-glow-emerald relative overflow-hidden group hover:border-emerald-500/30 transition duration-300">
+            <!-- Icon Background Circle -->
+            <div class="absolute top-0 right-0 p-8 text-emerald-500/5 pointer-events-none group-hover:text-emerald-500/10 transition duration-300">
+              <i data-lucide="list-checks" class="w-24 h-24"></i>
+            </div>
+
+            <div class="flex items-center space-x-3 mb-4">
+              <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400 border border-emerald-500/20">
+                <i data-lucide="check-square" class="w-5 h-5"></i>
+              </div>
+              <h4 class="text-md font-bold text-white tracking-wide">3. Operational Recovery Action Plan</h4>
+            </div>
+
+            <!-- Content Area (Checklists) -->
+            <div id="output-action-plan" class="text-sm text-slate-300 space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer Section -->
+  <footer class="mt-auto border-t border-slate-900 bg-slate-950/80 py-4 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 text-center flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+      <div>
+        Nexus Operations System &copy; 2026. Fully containerized routing nodes active.
+      </div>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-slate-400 transition">API Documentation</a>
+        <span>&middot;</span>
+        <a href="#" class="hover:text-slate-400 transition">Security Policy</a>
+        <span>&middot;</span>
+        <span class="text-indigo-400 flex items-center gap-1"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span> TLS v1.3 Secure</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script Logic -->
+  <script>
+    // CRUCIAL: PLACEHOLDER FOR RENDER URL CONFIGURATION
+    const BACKEND_URL = "REPLACE_WITH_RENDER_URL";
+
+    // Mock Logistics Scenarios Data
+    const templates = {
+      portCongestion: {
+        issue: "Vessel 'Ever Apex' carrying 14 containers of semiconductor chips is stuck at anchorage outside Port of LA/Long Beach. Delays exceed 12 days due to craneworker strikes. Contracted SLA penalty of $15,000/day triggers in 48 hours for electronics factory in Texas.",
+        priority: "high"
+      },
+      customsHold: {
+        issue: "Critical pharmaceutical shipment (insulin batch #B490-A) has been held by Frankfurt Customs Authority. Customs is citing missing import permit forms. Temperature-sensitive reefer units will exceed coolant life in 72 hours.",
+        priority: "high"
+      },
+      tempSpike: {
+        issue: "IoT cold-chain tracking reports reefer unit #RF-8092 transiting from Algeciras to Rotterdam has hit 8.4°C (SLA threshold limit: 4.0°C). Cargo is fresh seafood valued at €120,000. Potential equipment failure detected.",
+        priority: "med"
+      },
+      freightSpike: {
+        issue: "Driver shortage in Chicago distribution hub has halted regional dispatch of 48 bulk pallets. Outbound truck broker quoting 180% rate surge for spot-market re-booking. Urgent delivery needed for retail warehouse replenishment.",
+        priority: "med"
+      }
+    };
+
+    // Realistic Agent Generation outputs in case of fallback
+    const mockResponses = {
+      portCongestion: {
+        analysis: "<strong>Disruption Analysis:</strong> Container congestion at LAX/LGB. Node capacity is degraded by 64% due to local craneworker labor dispute. Impact assessment confirms $15,000/day SLA penalty will activate in 48 hours.<br><br><strong>Key Metrics:</strong><br>&bull; Impacted Cargo: Semiconductor components<br>&bull; Affected SLA Timeline: 48hr remaining<br>&bull; Risk Vector: Port deadlock, transport delay",
+        strategy: "<strong>Alternative Route:</strong> Intercept cargo manifest pre-docking and initiate emergency vessel diversion to Port of Oakland (OAK), bypassing LA anchorage. Secure priority container discharge using 'FastTrack' status.<br><br><strong>Details:</strong><br>&bull; Detour Delta: +1.5 transit days<br>&bull; Carrier Swap: Transfer from OAK port terminal to Union Pacific rail expedite block<br>&bull; Financial Premium: +$3,400 (Net savings: ~$40,000 versus SLA penalty)",
+        actionPlan: [
+          "Initiate manifest diversion filing with ocean carrier terminal operators within 3 hours.",
+          "Contract Union Pacific flatbed railcars for immediate overland transport from Oakland to Texas hub.",
+          "Dispatch drayage provider (Apex Logistics) to stand by at Oakland berth #4 for direct container haulage.",
+          "Notify Austin assembly facility operations supervisor of updated delivery window (ETA +36 hours behind original schedule)."
+        ]
+      },
+      customsHold: {
+        analysis: "<strong>Disruption Analysis:</strong> Regulatory customs hold at Frankfurt Main Cargo Terminal. Inspection flagged missing phytosanitary certification documents for biological compounds. Temp threshold danger limits cold-chain buffer to 72 hours.<br><br><strong>Key Metrics:</strong><br>&bull; Impacted Cargo: Insulin Batch B490-A<br>&bull; Temp Range: 3.8°C (Critical limit: 4.0°C)<br>&bull; Risk Vector: Loss of cargo potency, temperature excursion",
+        strategy: "<strong>Strategic Mitigation:</strong> Activate regional pharma broker agent to provide immediate digital certified indemnification bond. Concurrently dispatch a thermal protection specialist to replace the container dry-ice charge on-site to buy 96 hours of safety margins.<br><br><strong>Details:</strong><br>&bull; Intervention Location: FRA Air Cargo Center Block D<br>&bull; Partner Carrier: Lufthansa Cargo Special Handling division<br>&bull; Financial Premium: €1,200 (Re-ice & bonding fee)",
+        actionPlan: [
+          "Dispatch airport cold-chain service technician to re-ice refrigeration unit RF-300.",
+          "Transmit digital copies of export permits and compliance bonds directly to Frankfurt Customs Office via expedited broker portal.",
+          "Coordinate priority pickup with Thermo-Express logistics courier for immediate dispatch upon customs release.",
+          "Log temperature logs via continuous cloud tracker every 15 minutes."
+        ]
+      },
+      tempSpike: {
+        analysis: "<strong>Disruption Analysis:</strong> Temperature anomaly (8.4°C vs 4.0°C limit) detected in container RF-8092. GPS telemetry places container on highway A10 near Paris. Thermostat hardware failure suspected. Fresh seafood cargo has a shelf life shelf collapse window of 24 hours at this temp.<br><br><strong>Key Metrics:</strong><br>&bull; Current Temperature: 8.4°C<br>&bull; Cargo Value: €120,000<br>&bull; Location: Transiting near Paris Nord node",
+        strategy: "<strong>Alternative Route:</strong> Route truck to nearest certified cold storage partner facility in Senlis (Paris metro) for emergency consolidation and repacking. Move cargo to a standby operational refrigerated trailer instead of continuing directly to Rotterdam with faulty equipment.<br><br><strong>Details:</strong><br>&bull; Divert Cost: €850<br>&bull; Recovery Carrier: Petit Forestier emergency fleet<br>&bull; Target SLA Preservation: 100% salvage probability",
+        actionPlan: [
+          "Ping GPS coordinates to carrier truck driver and redirect path to Senlis Cold Hub.",
+          "Pre-book standby cross-dock bay and refrigeration truck at Senlis depot.",
+          "Perform cargo temperature probe test upon arrival to verify organic integrity.",
+          "Complete transload process and resume shipping routes to Rotterdam with cargo tracking activated."
+        ]
+      },
+      freightSpike: {
+        analysis: "<strong>Disruption Analysis:</strong> Regional driver shortage at Chicago terminal causing failure to secure linehaul trucks. Outbound spot market rates showing high volatility (+180% broker markup). Outbound retail delivery is late, impacting supplier scorecard.<br><br><strong>Key Metrics:</strong><br>&bull; Stalled Freight: 48 pallets<br>&bull; Hub Status: Severe dispatch backlog<br>&bull; Scorecard Risk: Retailer chargebacks imminent",
+        strategy: "<strong>Alternative Route:</strong> Bypass spot trucks by utilizing an intermodal rail terminal transfer (IMX Chicago to Dallas rail yard) for 40 pallets, and dispatch the remaining 8 ultra-critical pallets via expedited LTL carrier (FedEx Freight Priority).<br><br><strong>Details:</strong><br>&bull; Transport Mix: Rail intermodal + LTL Express<br>&bull; Total Cost: $9,200 (Spot broker was quoting $14,000)<br>&bull; ETA Offset: Rail arrivals +12hr delay; LTL arrives on time",
+        actionPlan: [
+          "Split shipment inventory into core LTL and deferred rail blocks.",
+          "Book priority LTL pickup for the 8 high-priority pallets.",
+          "Transfer 40 containerized pallets to Chicago CSX rail yard.",
+          "Coordinate delivery drayage from destination rail terminal directly to receiving dock."
+        ]
+      }
+    };
+
+    // System Clock Updater
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+      document.getElementById('system-clock').textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // DOM Elements
+    const executeBtn = document.getElementById('execute-btn');
+    const issueInput = document.getElementById('issue-input');
+    const autonomyRange = document.getElementById('autonomy-range');
+    const autonomyVal = document.getElementById('autonomy-val');
+    const priorityButtons = document.querySelectorAll('#priority-selector button');
+    
+    const emptyState = document.getElementById('empty-state');
+    const loadingState = document.getElementById('loading-state');
+    const outputState = document.getElementById('output-state');
+    const loadingLogs = document.getElementById('loading-logs');
+    const endpointWarning = document.getElementById('endpoint-warning');
+
+    const outId = document.getElementById('output-id');
+    const outAnalysis = document.getElementById('output-analysis');
+    const outStrategy = document.getElementById('output-strategy');
+    const outActionPlan = document.getElementById('output-action-plan');
+
+    // UI state trackers
+    let selectedPriority = "high";
+
+    // Check if user has configured the URL
+    const isMockMode = (BACKEND_URL === "REPLACE_WITH_RENDER_URL");
+    if (!isMockMode) {
+      endpointWarning.classList.add('hidden');
+    }
+
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Priority Selection Behavior
+    priorityButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        priorityButtons.forEach(b => {
+          b.className = "flex-1 py-1 text-xs font-semibold rounded bg-slate-800 text-slate-400 hover:bg-slate-700 transition";
+        });
+        
+        const priority = btn.dataset.priority;
+        selectedPriority = priority;
+        
+        if (priority === 'low') {
+          btn.className = "flex-1 py-1 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold";
+        } else if (priority === 'med') {
+          btn.className = "flex-1 py-1 text-xs font-semibold rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold";
+        } else {
+          btn.className = "flex-1 py-1 text-xs font-semibold rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold";
+        }
+      });
+    });
+
+    // Autonomy Slider display
+    autonomyRange.addEventListener('input', (e) => {
+      autonomyVal.textContent = e.target.value + '%';
+    });
+
+    // Preset Loader
+    function loadTemplate(key) {
+      const template = templates[key];
+      if (template) {
+        issueInput.value = template.issue;
+        
+        // Trigger priority button click to match template state
+        const targetBtn = Array.from(priorityButtons).find(btn => btn.dataset.priority === template.priority);
+        if (targetBtn) targetBtn.click();
+      }
+    }
+
+    // Dashboard reset button
+    function resetDashboard() {
+      outputState.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      issueInput.value = '';
+    }
+
+    // Logger simulator ticker lines
+    const logTickerPool = [
+      "Allocating dynamic socket address block...",
+      "Resolving supply chain topology maps...",
+      "Consulting Maritime cargo schedule archives...",
+      "Analyzing rail transit congestion metrics...",
+      "Negotiating LTL carrier rates on private exchange...",
+      "Synthesizing optimal routing alternatives...",
+      "Calculating SLA failure cost matrices...",
+      "Compiling complete risk response directive..."
+    ];
+
+    // Simulate Agent Logs to provide UI interactive depth
+    function runLogTicker() {
+      loadingLogs.innerHTML = '';
+      let logIndex = 0;
+      
+      const addLog = () => {
+        if (logIndex < logTickerPool.length && loadingState.classList.contains('hidden') === false) {
+          const div = document.createElement('div');
+          div.className = "flex items-start space-x-2 text-slate-400 text-2xs transition-all duration-150 transform translate-y-1 opacity-0";
+          div.innerHTML = `<span class="text-indigo-400 font-bold select-none">[AGNT-${logIndex}]</span> <span>${logTickerPool[logIndex]}</span>`;
+          loadingLogs.appendChild(div);
+          
+          // Trigger visual fade-in
+          setTimeout(() => {
+            div.classList.remove('translate-y-1', 'opacity-0');
+          }, 50);
+
+          loadingLogs.scrollTop = loadingLogs.scrollHeight;
+          logIndex++;
+          setTimeout(addLog, 450 + Math.random() * 300);
+        }
+      };
+      
+      addLog();
+    }
+
+    // Helper text formater (simple markdown-like parser)
+    function formatText(text) {
+      if (!text) return 'Not available';
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\r?\n/g, '<br>');
+    }
+
+    // Action plan bullet points parser
+    function formatActionPlan(plan) {
+      if (!plan) return 'No tasks specified.';
+      
+      let items = [];
+      if (Array.isArray(plan)) {
+        items = plan;
+      } else if (typeof plan === 'string') {
+        items = plan.split(/\n+/).map(p => p.replace(/^-\s*|^\[\s*\]\s*|^\d+\.\s*/, '').trim()).filter(p => p);
+      }
+
+      if (items.length === 0) {
+        return '<p class="text-slate-400 italic">No checklist items generated.</p>';
+      }
+
+      return `
+        <div class="space-y-2.5">
+          ${items.map((item, idx) => `
+            <label class="flex items-start space-x-3 p-3 bg-slate-900/50 hover:bg-slate-900 border border-slate-800/80 rounded-xl cursor-pointer transition duration-150 group">
+              <input type="checkbox" class="mt-1 w-4 h-4 rounded text-emerald-500 bg-slate-950 border-slate-700 focus:ring-emerald-500/20 focus:ring-offset-0 focus:outline-none transition shrink-0">
+              <span class="text-xs text-slate-300 group-hover:text-white transition">${formatText(item)}</span>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Main execute handler
+    executeBtn.addEventListener('click', async () => {
+      const issueText = issueInput.value.trim();
+      
+      if (!issueText) {
+        alert("Please enter a logistics issue or select one of the simulation templates.");
+        issueInput.focus();
+        return;
+      }
+
+      // Transition UI to loading state
+      emptyState.classList.add('hidden');
+      outputState.classList.add('hidden');
+      loadingState.classList.remove('hidden');
+      executeBtn.disabled = true;
+      executeBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+      // Start the log visual updates
+      runLogTicker();
+
+      const payload = {
+        issue: issueText,
+        priority: selectedPriority,
+        autonomy: autonomyRange.value
+      };
+
+      try {
+        let results;
+
+        if (isMockMode) {
+          // Simulate latency to display gorgeous logs and spinners
+          await new Promise(resolve => setTimeout(resolve, 3800));
+          
+          // Match inputs against templates or generate generic mock response
+          let matchedKey = 'portCongestion';
+          if (issueText.toLowerCase().includes('customs') || issueText.toLowerCase().includes('frankfurt')) {
+            matchedKey = 'customsHold';
+          } else if (issueText.toLowerCase().includes('temp') || issueText.toLowerCase().includes('reefer')) {
+            matchedKey = 'tempSpike';
+          } else if (issueText.toLowerCase().includes('driver') || issueText.toLowerCase().includes('truck')) {
+            matchedKey = 'freightSpike';
+          } else if (!templates[matchedKey]) {
+            // General Fallback response
+            matchedKey = 'portCongestion';
+          }
+          results = mockResponses[matchedKey];
+        } else {
+          // Perform network request
+          const response = await fetch(BACKEND_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP Error Status: ${response.status}`);
+          }
+
+          results = await response.json();
+        }
+
+        // Process response payload (handle structured vs simple string fallbacks)
+        let analysisContent = '';
+        let strategyContent = '';
+        let actionPlanData = [];
+
+        if (results && typeof results === 'object') {
+          // Extract analysis
+          const analysisRaw = results.analysis || results.Analysis || results.root_cause || '';
+          analysisContent = analysisRaw ? formatText(analysisRaw) : 'Analysis parsed from general response:\n' + formatText(JSON.stringify(results));
+          
+          // Extract strategy
+          const strategyRaw = results.strategy || results.Strategy || results.routing_plan || '';
+          strategyContent = strategyRaw ? formatText(strategyRaw) : 'Strategy compiled successfully.';
+
+          // Extract action plan
+          const actionRaw = results.actionPlan || results.action_plan || results.ActionPlan || results.Action_Plan || results.steps || [];
+          actionPlanData = actionRaw;
+        } else if (typeof results === 'string') {
+          // If response is just a string, attempt to segment it
+          analysisContent = `<strong>Summary:</strong><br>${formatText(results)}`;
+          strategyContent = "Strategy compiled as unified directive block.";
+          actionPlanData = ["Verify agent directive execution status.", "Notify supply chain ops supervisor."];
+        }
+
+        // Set values
+        outId.textContent = 'AR-' + Math.floor(1000 + Math.random() * 9000);
+        outAnalysis.innerHTML = analysisContent;
+        outStrategy.innerHTML = strategyContent;
+        outActionPlan.innerHTML = formatActionPlan(actionPlanData);
+
+        // Display outcome, refresh icons
+        loadingState.classList.add('hidden');
+        outputState.classList.remove('hidden');
+        lucide.createIcons();
+
+      } catch (err) {
+        console.error("Agentic Router Network Error:", err);
+        
+        // Beautiful error boundary output
+        outId.textContent = 'ERROR';
+        outAnalysis.innerHTML = `
+          <div class="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl flex items-start space-x-2.5">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="font-bold block mb-1">Execution Pipeline Failed</span>
+              Could not communicate with the remote agent swarm backend. Check your network, server state, or configure BACKEND_URL.
+            </div>
+          </div>
+          <div class="mt-4 font-mono text-xs text-slate-500 bg-slate-950 p-3 rounded-lg border border-slate-900">
+            ${err.message || err}
+          </div>
+        `;
+        outStrategy.innerHTML = `<span class="text-slate-400 italic">Strategy execution aborted due to upstream node connection failure.</span>`;
+        outActionPlan.innerHTML = formatActionPlan(["Investigate server logs on Render service.", "Confirm CORS policies allow cross-origin requests.", "Verify local network route is active."]);
+
+        loadingState.classList.add('hidden');
+        outputState.classList.remove('hidden');
+        lucide.createIcons();
+
+      } finally {
+        executeBtn.disabled = false;
+        executeBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+      }
+    });
+  </script>
+</body>
+</html>
